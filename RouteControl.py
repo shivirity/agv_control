@@ -6,7 +6,7 @@ NUM_OF_AGVS = 8
 
 
 class RouteController:
-    def __init__(self, routes: list):
+    def __init__(self, routes: dict):
         """
         初始化
 
@@ -148,25 +148,24 @@ class RouteController:
         :param step_list: 表示在当前节点是否前进，用以更新 residual routes，True为已前进，False为未前进，len=8
         :return: 车辆控制策略列表
         """
-        assert len(step_list) == self.num_of_agv
 
         # 更新 reservation
         loc_list = list(loc_list)
         self._update_reservation(loc_list=loc_list)
 
-        # update residual_routes & hash_route
-        step_grid_list = []  # 记录各车上一步路过节点，未前进则为-1
-        for agv in range(self.num_of_agv):
-            if step_list[agv]:  # 前进节点
-                assert len(self.residual_routes[agv]) > 0
-                step_grid = self.residual_routes[agv].pop(0)  # update residual_routes
-                step_grid_list.append(step_grid)
-                self.hash_route[step_grid].remove(agv)  # update hash_route
-            else:  # 未前进节点
-                step_grid_list.append(-1)
-
-        # update shared_routes & shared_agvs
         if step_list is not None:
+            # update residual_routes & hash_route
+            step_grid_list = []  # 记录各车上一步路过节点，未前进则为-1
+            for agv in range(self.num_of_agv):
+                if step_list[agv]:  # 前进节点
+                    assert len(self.residual_routes[agv]) > 0
+                    step_grid = self.residual_routes[agv].pop(0)  # update residual_routes
+                    step_grid_list.append(step_grid)
+                    self.hash_route[step_grid].remove(agv)  # update hash_route
+                else:  # 未前进节点
+                    step_grid_list.append(-1)
+
+            # update shared_routes & shared_agvs
             for agv in range(self.num_of_agv):
                 # 没有剩余路径，需要更新或指示任务完成
                 if len(self.residual_routes[agv]) == 0:
